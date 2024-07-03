@@ -12,6 +12,7 @@ import React from 'react'
 import enableWindowCloseDispatcher from '../../common/util/close-window-dispatcher'
 import ObojoboIdleTimer from '../../common/components/obojobo-idle-timer'
 import SimpleDialog from '../../common/components/modal/simple-dialog'
+import { isEqual } from 'underscore'
 
 const ModalContainer = Common.components.ModalContainer
 const ModalUtil = Common.util.ModalUtil
@@ -28,6 +29,7 @@ class EditorApp extends React.Component {
 		// store the current version id for locking
 		// not stored on state because no effect on render
 		this.contentId = null
+		const unsavedChanges = localStorage.getItem("localStorageJSON")
 
 		this.state = {
 			model: null,
@@ -40,7 +42,9 @@ class EditorApp extends React.Component {
 			mode: VISUAL_MODE,
 			code: null,
 			requestStatus: null,
-			requestError: null
+			requestError: null,
+			unsavedChanges: unsavedChanges ? true : null,
+			overwrite: false
 		}
 
 		// caluclate edit lock settings
@@ -85,17 +89,49 @@ class EditorApp extends React.Component {
 		this.onWindowReturnFromInactive = this.onWindowReturnFromInactive.bind(this)
 		this.onWindowInactive = this.onWindowInactive.bind(this)
 		this.renewLockInterval = null
+		this.saveToLocalStorage = this.saveToLocalStorage.bind(this)
+		this.overwriteChanges = this.overwriteChanges.bind(this)
+		this.cancelOverwrite = this.cancelOverwrite.bind(this)
+	}
+
+	// all the stuff you need to do to save the current json string to localStorage
+	saveToLocalStorage(currentDraftJSON) {
+		// write the current draft JSON into local storage
+		// compare json here
+		if(!isEqual(currentDraftJSON, this.state.draft)) {
+			localStorage.setItem('localStorageJSON', JSON.stringify(currentDraftJSON))
+			this.setState({ unsavedChanges: true })
+			this.setState({ firstLoad: false })
+		} else {
+			localStorage.removeItem('localStorageJSON')
+		}
+
 	}
 
 	saveDraft(draftId, draftSrc, xmlOrJSON = 'json') {
 		const mode = xmlOrJSON === 'xml' ? 'text/plain' : 'application/json'
+		// remove local storage
+		if(localStorage.getItem("localStorageJSON")) {
+			localStorage.removeItem("localStorageJSON");
+		}
 		return EditorAPI.postDraft(draftId, draftSrc, mode)
 			.then(({ contentId, result }) => {
 				if (result.status !== 'ok') {
 					throw Error(result.value.message)
 				}
+				
+				contentId = this.contentId
 
-				this.contentId = contentId // keep new contentId for edit locks
+				if(xmlOrJSON !== 'xml') {
+					this.setState({
+						draft: {
+							...JSON.parse(draftSrc),
+							contentId
+						}
+					})
+
+				}
+
 				return true
 			})
 			.catch(e => {
@@ -104,10 +140,60 @@ class EditorApp extends React.Component {
 			})
 	}
 
+	overwriteChanges() {
+		try {
+			const localStorageJSON = localStorage.getItem('localStorageJSON')
+			const parsedLocalStorageJSON = JSON.parse(localStorageJSON)	
+
+			this.setState({ 
+				unsavedChanges: false,
+			}, () => {
+				localStorage.removeItem('localStorageJSON');
+				this.saveDraft(parsedLocalStorageJSON.draftId, localStorageJSON, 'json').then(() => {
+					this.reloadDraft(this.state.draftId, this.state.mode);
+				}).then(() => {
+					window.alert('Page needs to refresh in order7 for overwritten changes to show'); //eslint-disable-line no-alert
+					window.removeEventListener('beforeunload', this.checkIfSaved)
+					window.location.reload();
+				})
+			})
+
+		}catch(e) {
+			throw new Error(e)
+		}
+	}
+
+	cancelOverwrite() {
+		localStorage.removeItem('localStorageJSON');
+		ModalUtil.hide();
+	}
+
 	getVisualEditorState(draftId, draftModel) {
 		OboModel.clearAll()
 		const json = JSON.parse(draftModel)
 		const obomodel = OboModel.create(json)
+
+
+		// compare and show modal here 
+		// define functions instead of using anonymous/arrow functions
+		const localStorageJSON = localStorage.getItem('localStorageJSON')
+		if (this.state.unsavedChanges) {
+			this.setState({ overwrite: true })
+			if(!isEqual(localStorageJSON, json) ) {
+				ModalUtil.show(
+					<SimpleDialog
+						yesOrNo={true}
+						title={"Restore Unsaved Changes?"}
+						onConfirm={this.overwriteChanges}
+						onCancel={this.props.onCancel}
+					>
+						It looks like you did not save changes before closing the window.
+						<br/><br/>
+						Would you like to restore your unsaved changes?
+					</SimpleDialog>
+				)
+			}
+		}
 
 		EditorStore.init(
 			obomodel,
@@ -209,6 +295,7 @@ class EditorApp extends React.Component {
 		return EditorAPI.getFullDraft(draftId, mode === VISUAL_MODE ? 'json' : mode)
 			.then(({ contentId, body }) => {
 				this.contentId = contentId
+
 				switch (mode) {
 					case XML_MODE:
 						return body
@@ -223,7 +310,7 @@ class EditorApp extends React.Component {
 							error.type = json.value.type
 							throw error
 						}
-						// stringify and format the draft data
+
 						return JSON.stringify(json.value, null, 4)
 					}
 				}
@@ -355,6 +442,7 @@ class EditorApp extends React.Component {
 				switchMode={this.switchMode}
 				insertableItems={Common.Registry.insertableItems}
 				saveDraft={this.saveDraft}
+				saveToLocalStorage={this.saveToLocalStorage}
 			/>
 		)
 	}
@@ -371,6 +459,8 @@ class EditorApp extends React.Component {
 				switchMode={this.switchMode}
 				insertableItems={Common.Registry.insertableItems}
 				saveDraft={this.saveDraft}
+				saveToLocalStorage={this.saveToLocalStorage}
+				unsavedChanges={this.unsavedChanges}
 				readOnly={
 					// Prevents editing a draft that's a revision,
 					// even if the url was visited manually

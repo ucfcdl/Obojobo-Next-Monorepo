@@ -73,13 +73,17 @@ class VisualEditor extends React.Component {
 		this.state = {
 			value: json,
 			saveState: 'saveSuccessful',
+			lastSaved: null,
+			elapsed: 0,
+			unsavedChanges: false, 
 			editable: json && json.length >= 1 && !json[0].text,
 			showPlaceholders: true,
 			contentRect: null,
 			objectives: this.props.model?.objectives ?? [],
 			addObjective: this.addObjective,
 			removeObjective: this.removeObjective,
-			updateObjective: this.updateObjective
+			updateObjective: this.updateObjective,
+			intervalId: null,
 		}
 
 		this.pageEditorContainerRef = React.createRef()
@@ -102,6 +106,8 @@ class VisualEditor extends React.Component {
 		this.setEditorFocus = this.setEditorFocus.bind(this)
 		this.onClick = this.onClick.bind(this)
 		this.hasInvalidFields = this.hasInvalidFields.bind(this)
+		this.formatJSON = this.formatJSON.bind(this)
+		this.saveModuleToLocalStorage = this.saveModuleToLocalStorage.bind(this)
 
 		this.editor = this.withPlugins(withHistory(withReact(createEditor())))
 		this.editor.toggleEditable = this.toggleEditable
@@ -181,6 +187,12 @@ class VisualEditor extends React.Component {
 		return Array.from(items.values())
 	}
 
+	updateElapsed() {
+		if (this.state.lastSaved === null) return {...this.state.lastSaved}
+		const duration =  Math.floor((Date.now() - this.state.lastSaved) / (60 * 1000))
+		this.setState({...this.state, elapsed: duration})
+	}
+
 	componentDidMount() {
 		Dispatcher.on('modal:show', () => {
 			this.toggleEditable(false)
@@ -192,6 +204,13 @@ class VisualEditor extends React.Component {
 		window.addEventListener('beforeunload', this.checkIfSaved)
 		// Setup global keydown to listen to all global keys
 		window.addEventListener('keydown', this.onKeyDownGlobal)
+
+		const intervalId = setInterval(() => {
+			this.saveModuleToLocalStorage()
+			this.updateElapsed()
+		},
+		10000)
+		this.setState({ ...this.state, intervalId })
 
 		// Set keyboard focus to the editor
 		Transforms.select(this.editor, Editor.start(this.editor, []))
@@ -219,6 +238,7 @@ class VisualEditor extends React.Component {
 		window.removeEventListener('beforeunload', this.checkIfSaved)
 		window.removeEventListener('keydown', this.onKeyDownGlobal)
 		if (this.resizeObserver) this.resizeObserver.disconnect()
+		clearInterval(this.state.intervalId)
 	}
 
 	checkIfSaved(event) {
@@ -232,10 +252,12 @@ class VisualEditor extends React.Component {
 			return undefined
 		}
 
-		if (this.state.saveState !== 'saveSuccessful') {
+		// have to change value before save state is unsuccessful or do it in the already existing if
+		if (this.state.saveState !== 'saveSuccessful') {	
 			event.returnValue = true
 			return true // Returning true will cause browser to ask user to confirm leaving page
 		}
+
 
 		//eslint-disable-next-line
 		return undefined
@@ -407,7 +429,7 @@ class VisualEditor extends React.Component {
 		return false
 	}
 
-	saveModule(draftId) {
+	formatJSON() {
 		if (this.props.readOnly) {
 			return
 		}
@@ -449,20 +471,30 @@ class VisualEditor extends React.Component {
 					contentJSON.content = child.get('content')
 					break
 			}
-
 			json.children.push(contentJSON)
 		})
+
+		return json
+	}
+
+	saveModule(draftId) {
+		const json = this.formatJSON()
 		this.setState({ saveState: 'saving' })
 
 		return this.props.saveDraft(draftId, JSON.stringify(json)).then(isSaved => {
 			if (isSaved) {
 				if (this.state.saveState === 'saving') {
-					this.setState({ saveState: 'saveSuccessful' })
+					this.setState({...this.state, saveState: 'saveSuccessful', lastSaved: Date.now()})
 				}
 			} else {
 				this.setState({ saveState: 'saveFailed' })
 			}
 		})
+	}
+
+	saveModuleToLocalStorage() {
+		const json = this.formatJSON()
+		this.props.saveToLocalStorage(json)
 	}
 
 	exportToJSON(page, value) {
@@ -498,13 +530,13 @@ class VisualEditor extends React.Component {
 		this.exportToJSON(this.props.page, this.state.value)
 	}
 
-	importFromJSON() {
+	importFromJSON(existingJSON = null) {
 		if (!this.props.page) {
 			// if page is empty, exit
 			return [{ text: 'No content available, create a page to start editing' }]
 		}
 
-		const json = this.props.page.toJSON()
+		const json = existingJSON ?? this.props.page.toJSON()
 
 		if (json.type === ASSESSMENT_NODE) {
 			return [this.assessment.oboToSlate(this.props.page)]
@@ -634,12 +666,14 @@ class VisualEditor extends React.Component {
 		}
 	}
 
+
 	render() {
 		const className =
 			'editor--page-editor ' +
 			isOrNot(this.state.showPlaceholders, 'show-placeholders') +
 			isOrNot(this.props.readOnly, 'read-only')
-
+	
+		//check document engine for confirmation dialog/modal
 		return (
 			<div className={className} ref={this.pageEditorContainerRef}>
 				<Slate editor={this.editor} value={this.state.value} onChange={this.onChange}>
@@ -650,6 +684,7 @@ class VisualEditor extends React.Component {
 							<Button className="skip-nav" onClick={this.setEditorFocus}>
 								Skip to Editor
 							</Button>
+							{this.state.lastSaved ? <span className='lastSaved'>{this.state.elapsed < 1 ? 'Last saved < 1m ago' : `Last saved ${this.state.elapsed}m ago`}</span> : <></>}
 							<FileToolbarViewer
 								title={this.props.model.title}
 								draftId={this.props.draftId}

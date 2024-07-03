@@ -433,10 +433,14 @@ describe('VisualEditor', () => {
 		  "addObjective": [Function],
 		  "contentRect": null,
 		  "editable": false,
+		  "elapsed": 0,
+		  "intervalId": 108,
+		  "lastSaved": null,
 		  "objectives": Array [],
 		  "removeObjective": [Function],
 		  "saveState": "saveSuccessful",
 		  "showPlaceholders": true,
+		  "unsavedChanges": false,
 		  "updateObjective": [Function],
 		  "value": Array [
 		    Object {
@@ -458,10 +462,14 @@ describe('VisualEditor', () => {
 		  "addObjective": [Function],
 		  "contentRect": null,
 		  "editable": true,
+		  "elapsed": 0,
+		  "intervalId": 114,
+		  "lastSaved": null,
 		  "objectives": Array [],
 		  "removeObjective": [Function],
 		  "saveState": "",
 		  "showPlaceholders": true,
+		  "unsavedChanges": false,
 		  "updateObjective": [Function],
 		  "value": Array [
 		    Object {
@@ -679,6 +687,20 @@ describe('VisualEditor', () => {
 		component.unmount()
 
 		expect(plugins).toMatchSnapshot()
+	})
+
+	test('draft saves to local storage every 10 seconds', () => {
+		jest.useFakeTimers();
+
+		const saveModuleToLocalStorage = jest.spyOn(VisualEditor.prototype, 'saveModuleToLocalStorage');
+
+		expect(setInterval).toHaveBeenCalledTimes(1);
+		expect(setInterval).toHaveBeenLastCalledWith(expect(saveModuleToLocalStorage), 10000);
+	})
+
+	test('lastSaved displays in toolbar after save', () => {
+		const component = mount(<VisualEditor {...props}/>)
+
 	})
 
 	test('exportToJSON returns expected json for assessment node', () => {
