@@ -14,6 +14,7 @@
 	min-height: calc(100vh - 10.5em);
 	position: relative;
 	min-width: 56.5em;
+	z-index: 0;
 
 	.obojobo-draft--modules--module {
 		margin: 3em auto;
@@ -36,6 +37,20 @@
 		letter-spacing: -0.025em;
 		display: inline;
 		cursor: text;
+	}
+
+	.lastSaved {
+		position: absolute;
+		top: 2.8em;
+		right: 12em;
+		font-family: $font-default;
+		font-size: 0.8em;
+		padding-left: 3em;
+		display: inline-block;
+		pointer-events: none;
+		text-align: center;
+		font-weight: bold;
+		color: $color-text-minor
 	}
 
 	.skip-nav {

@@ -99,6 +99,7 @@ class CodeEditor extends React.Component {
 		location.reload()
 	}
 
+	//TARGET
 	saveAndGetTitleFromCode() {
 		// Update the title in the File Toolbar
 		const title = EditorUtil.getTitleFromString(this.state.code, this.props.mode)
