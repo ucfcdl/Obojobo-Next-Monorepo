@@ -7209,15 +7209,38 @@
 									{
 										"data": {},
 										"text": {
-											"value": "Pick all correct answers questions allow a student to select as many answers as they want. A student must select all the correct choices to get the points for that question.",
+											"value": "Pick all correct answers questions allow a student to select as many answers as they want. By default, a student must select all the correct choices to get the points for that question.",
 											"styleList": [
 												{
-													"end": 105,
+													"end": 117,
 													"data": {},
 													"type": "b",
-													"start": 100
+													"start": 112
 												}
 											]
+										}
+									}
+								]
+							},
+							"children": []
+						},
+						{
+							"id": "e081e958-6130-40b6-b4c4-30b956a61143",
+							"type": "ObojoboDraft.Chunks.Text",
+							"content": {
+								"textGroup": [
+									{
+										"data": {},
+										"text": {
+											"value": "Alternatively, Partial Scoring can be turned on which allows students to receive partial credit for the question based on how many correct and incorrect choices they select.",
+											"styleList": null
+										}
+									},
+									{
+										"data": {},
+										"text": {
+											"value": "In the question below, selecting only one correct answer would result in a 50%, and selecting one correct answer along with the incorrect answer would result in a 0%. Selecting all three answer choices would result in a 50% as well, as the incorrect choice cancels out one of the correct choices.",
+											"styleList": null
 										}
 									}
 								]
@@ -7248,6 +7271,15 @@
 															"start": 10
 														}
 													]
+												}
+											},
+											{
+												"data": {
+													"indent": 0
+												},
+												"text": {
+													"value": "If Partial Scoring is enabled, then the student can receive partial credit even if they didn't get it completely correct.",
+													"styleList": null
 												}
 											}
 										]

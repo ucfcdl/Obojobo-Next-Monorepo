@@ -12,7 +12,8 @@ describe('MCAssessment adapter', () => {
 		const attrs = {
 			content: {
 				responseType: 'pick-one',
-				shuffle: false
+				shuffle: false,
+				partialScoring: false
 			}
 		}
 
@@ -62,19 +63,22 @@ describe('MCAssessment adapter', () => {
 		const a = {
 			modelState: {
 				responseType: 'pick-one',
-				shuffle: true
+				shuffle: true,
+				partialScoring: false
 			}
 		}
 		const attrs = {
 			content: {
 				responseType: 'pick-one',
-				shuffle: true
+				shuffle: true,
+				partialScoring: false
 			}
 		}
 		const b = {
 			modelState: {
 				responseType: null,
-				shuffle: false
+				shuffle: false,
+				partialScoring: false
 			}
 		}
 
@@ -101,7 +105,8 @@ describe('MCAssessment adapter', () => {
 		const attrs = {
 			content: {
 				responseType: 'pick-one',
-				shuffle: true
+				shuffle: true,
+				partialScoring: false
 			}
 		}
 		const json = { content: {} }

@@ -36,6 +36,25 @@
 			vertical-align: middle;
 		}
 
+		.scoring-explanation {
+			position: absolute;
+			right: 17.25em;
+			z-index: $z-index-above-all;
+
+			.text-container {
+				font-family: $font-default;
+				font-size: 0.9rem;
+				width: 15rem;
+
+				> .text {
+					padding: 0.5rem;
+					margin: 0.5rem;
+					background: $color-bg;
+					border-radius: $dimension-rounded-radius;
+				}
+			}
+		}
+
 		.question-type {
 			position: absolute;
 			top: 2.85em;
@@ -47,6 +66,10 @@
 			font-weight: normal;
 			font-size: 0.7em;
 			cursor: pointer;
+
+			&.scoring {
+				right: 13.7em;
+			}
 
 			&:hover {
 				border: 1px solid $color-action;

@@ -238,8 +238,8 @@ describe('MCAssessmentViewerComponent', () => {
 		${'pick-one-multiple-correct'} | ${['b', 'c', 'd']}      | ${100}
 		${'pick-one-multiple-correct'} | ${['a', 'b', 'c', 'd']} | ${100}
 		${'pick-all'}                  | ${[]}                   | ${0}
-		${'pick-all'}                  | ${['a']}                | ${0}
-		${'pick-all'}                  | ${['b']}                | ${0}
+		${'pick-all'}                  | ${['a']}                | ${50}
+		${'pick-all'}                  | ${['b']}                | ${50}
 		${'pick-all'}                  | ${['c']}                | ${0}
 		${'pick-all'}                  | ${['d']}                | ${0}
 		${'pick-all'}                  | ${['a', 'b']}           | ${100}
@@ -248,8 +248,8 @@ describe('MCAssessmentViewerComponent', () => {
 		${'pick-all'}                  | ${['b', 'c']}           | ${0}
 		${'pick-all'}                  | ${['b', 'd']}           | ${0}
 		${'pick-all'}                  | ${['c', 'd']}           | ${0}
-		${'pick-all'}                  | ${['a', 'b', 'c']}      | ${0}
-		${'pick-all'}                  | ${['a', 'b', 'd']}      | ${0}
+		${'pick-all'}                  | ${['a', 'b', 'c']}      | ${50}
+		${'pick-all'}                  | ${['a', 'b', 'd']}      | ${50}
 		${'pick-all'}                  | ${['a', 'c', 'd']}      | ${0}
 		${'pick-all'}                  | ${['b', 'c', 'd']}      | ${0}
 		${'pick-all'}                  | ${['a', 'b', 'c', 'd']} | ${0}

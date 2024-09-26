@@ -3,6 +3,7 @@
 exports[`MCAssessment adapter can convert to JSON 1`] = `
 Object {
   "content": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": true,
   },
@@ -12,6 +13,7 @@ Object {
 exports[`MCAssessment adapter can convert to JSON WITH attributes 1`] = `
 Object {
   "content": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": true,
   },
@@ -21,6 +23,7 @@ Object {
 exports[`MCAssessment adapter construct builds with attributes 1`] = `
 Object {
   "modelState": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": false,
   },
@@ -30,6 +33,7 @@ Object {
 exports[`MCAssessment adapter construct builds with responseType 1`] = `
 Object {
   "modelState": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": true,
   },
@@ -39,6 +43,7 @@ Object {
 exports[`MCAssessment adapter construct builds with shuffle 1`] = `
 Object {
   "modelState": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": true,
   },
@@ -48,6 +53,7 @@ Object {
 exports[`MCAssessment adapter construct builds without attributes 1`] = `
 Object {
   "modelState": Object {
+    "partialScoring": false,
     "responseType": "pick-one",
     "shuffle": true,
   },

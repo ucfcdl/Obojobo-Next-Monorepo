@@ -22,14 +22,22 @@ class MCAssessment extends DraftNode {
 					})
 				)
 
+				const partialScoring = this.node.content.partialScoring || false
 				const responseIds = new Set(responseRecord.response.ids)
 
-				if (correctIds.size !== responseIds.size) return setScore(0)
+				let score,
+					numCorrect = 0
 
-				let score = 100
-				correctIds.forEach(id => {
-					if (!responseIds.has(id)) score = 0
+				responseIds.forEach(id => {
+					if (correctIds.has(id)) numCorrect++
+					else numCorrect--
 				})
+
+				if (!partialScoring && numCorrect !== correctIds.size) return setScore(0)
+
+				if (numCorrect <= 0) score = 0
+				else score = (100 * numCorrect) / correctIds.size
+
 				setScore(score)
 				break
 			}

@@ -119,16 +119,22 @@ export default class MCAssessment extends OboQuestionAssessmentComponent {
 
 		switch (this.props.model.modelState.responseType) {
 			case 'pick-all': {
-				if (correct.size !== responses.size) {
-					return { score: 0, details: null }
-				}
+				let score,
+					numCorrect = 0
 
-				let score = 100
-				correct.forEach(function(id) {
-					if (!responses.has(id)) {
-						score = 0
+				responses.forEach(function(id) {
+					if (correct.has(id)) {
+						numCorrect++
+					} else {
+						numCorrect--
 					}
 				})
+
+				if (numCorrect <= 0) {
+					score = 0
+				} else {
+					score = (100 * numCorrect) / correct.size
+				}
 
 				return { score, details: null }
 			}

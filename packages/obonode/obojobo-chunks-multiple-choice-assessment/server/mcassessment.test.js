@@ -66,10 +66,20 @@ describe('MCAssessment', () => {
 		expect(setScore).toHaveBeenCalledWith(0)
 	})
 
-	test('onCalculateScore sets score to 0 if number of chosen !== number of correct answers (pick-all)', () => {
+	test('onCalculateScore determines partial score if number of chosen !== number of correct answers (pick-all)', () => {
 		const question = { contains: () => true }
 		const responseRecord = { response: { ids: ['test'] } }
-		mcAssessment.node.content = { responseType: 'pick-all' }
+		mcAssessment.node.content = { responseType: 'pick-all', partialScoring: true }
+
+		expect(setScore).not.toHaveBeenCalled()
+		mcAssessment.onCalculateScore({}, question, responseRecord, setScore)
+		expect(setScore).toHaveBeenCalledWith(50)
+	})
+
+	test('onCalculateScore does not give negative score with partial scoring (pick-all)', () => {
+		const question = { contains: () => true }
+		const responseRecord = { response: { ids: ['test2', 'test3'] } }
+		mcAssessment.node.content = { responseType: 'pick-all', partialScoring: true }
 
 		expect(setScore).not.toHaveBeenCalled()
 		mcAssessment.onCalculateScore({}, question, responseRecord, setScore)

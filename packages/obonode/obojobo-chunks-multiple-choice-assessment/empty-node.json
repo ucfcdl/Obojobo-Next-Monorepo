@@ -2,7 +2,8 @@
 	"type": "ObojoboDraft.Chunks.MCAssessment",
 	"content": {
 		"responseType": "pick-one",
-		"shuffle": true
+		"shuffle": true,
+		"partialScoring": false
 	},
 	"children": [
 		{

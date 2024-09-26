@@ -161,6 +161,7 @@ exports[`BasicReview Basic component correct 1`] = `
               },
             ],
             "content": Object {
+              "partialScoring": false,
               "responseType": "pick-one",
               "shuffle": true,
             },
@@ -386,6 +387,7 @@ exports[`BasicReview Basic component incorrect 1`] = `
               },
             ],
             "content": Object {
+              "partialScoring": false,
               "responseType": "pick-one",
               "shuffle": true,
             },
@@ -611,6 +613,7 @@ exports[`BasicReview Basic component survey 1`] = `
               },
             ],
             "content": Object {
+              "partialScoring": false,
               "responseType": "pick-one",
               "shuffle": true,
             },

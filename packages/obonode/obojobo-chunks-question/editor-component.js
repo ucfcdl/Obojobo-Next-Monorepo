@@ -8,7 +8,7 @@ import withSlateWrapper from 'obojobo-document-engine/src/scripts/oboeditor/comp
 import React from 'react'
 import Node from 'obojobo-document-engine/src/scripts/oboeditor/components/node/editor-component'
 
-const { Button } = Common.components
+const { Button, MoreInfoButton } = Common.components
 const QUESTION_NODE = 'ObojoboDraft.Chunks.Question'
 const SOLUTION_NODE = 'ObojoboDraft.Chunks.Question.Solution'
 const MCASSESSMENT_NODE = 'ObojoboDraft.Chunks.MCAssessment'
@@ -30,7 +30,7 @@ const Question = props => {
 		})
 	}
 
-	const toggleCollapsed = () => {
+	function toggleCollapsed() {
 		const path = ReactEditor.findPath(props.editor, props.element)
 		const collapsed = !props.element.content.collapsed
 
@@ -57,6 +57,24 @@ const Question = props => {
 			props.editor,
 			{ questionType: type },
 			{ at: path.concat(lastChildIndex) }
+		)
+	}
+
+	function onSetScoring(event) {
+		const hasSolution = getHasSolution()
+		let assessmentNode
+
+		if (hasSolution) {
+			assessmentNode = props.element.children[props.element.children.length - 2]
+		} else {
+			assessmentNode = props.element.children[props.element.children.length - 1]
+		}
+
+		const path = ReactEditor.findPath(props.editor, assessmentNode)
+		return Transforms.setNodes(
+			props.editor,
+			{ content: { ...assessmentNode.content, partialScoring: event.target.checked } },
+			{ at: path }
 		)
 	}
 
@@ -165,15 +183,14 @@ const Question = props => {
 
 	const hasSolution = getHasSolution()
 	const isInAssessment = getIsInAssessment()
-	let questionType
 
-	// The question type is determined by the MCAssessment or the NumericAssessement
-	// This is either the last node or the second to last node
-	if (hasSolution) {
-		questionType = element.children[element.children.length - 2].type
-	} else {
-		questionType = element.children[element.children.length - 1].type
-	}
+	// The question type is determined by the MCAssessment or the NumericAssessment
+	// This is either the last node or the second to last node depending on whether the
+	//  'explanation' area is visible
+	const questionElement = element.children[element.children.length - (hasSolution ? 2 : 1)]
+	const questionType = questionElement.type
+
+	const partialScoring = questionElement.content?.partialScoring || false
 
 	const className =
 		'component obojobo-draft--chunks--question is-viewed pad' +
@@ -204,6 +221,25 @@ const Question = props => {
 									<option value={MCASSESSMENT_NODE}>Multiple choice</option>
 									<option value={NUMERIC_ASSESSMENT_NODE}>Input a number</option>
 								</select>
+								{questionType === MCASSESSMENT_NODE &&
+								questionElement.content?.responseType === 'pick-all' ? (
+									<React.Fragment>
+										<span className="scoring-explanation">
+											<MoreInfoButton>
+												<div className="text-container">
+													<p className="text">
+														Students will earn partial credit based on how many of the correct
+														answers they select.
+													</p>
+												</div>
+											</MoreInfoButton>
+										</span>
+										<label className="question-type scoring" contentEditable={false}>
+											<input type="checkbox" checked={partialScoring} onChange={onSetScoring} />
+											Partial Scoring
+										</label>
+									</React.Fragment>
+								) : null}
 								<label className="question-type" contentEditable={false}>
 									<input type="checkbox" checked={isTypeSurvey} onChange={onSetType} />
 									Survey Only
