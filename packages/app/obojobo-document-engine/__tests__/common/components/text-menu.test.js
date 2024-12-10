@@ -1,7 +1,5 @@
 import React from 'react'
 import renderer from 'react-test-renderer'
-import { mount } from 'enzyme'
-
 import TextMenu from '../../../src/scripts/common/components/text-menu'
 
 const createRect = () => {
@@ -59,8 +57,12 @@ describe('TextMenu', () => {
 
 	test('TextMenu calls mouseDown', () => {
 		const mockCommandHandler = jest.fn()
+		const mockEvent = {
+			preventDefault: jest.fn(),
+			stopPropagation: jest.fn()
+		}
 
-		const component = mount(
+		const component = renderer.create(
 			<TextMenu
 				relativeToElement={{
 					getBoundingClientRect: () => createRect()
@@ -72,8 +74,12 @@ describe('TextMenu', () => {
 			/>
 		)
 
-		component.find('a').simulate('mouseDown')
+		const linkElement = component.root.findByType('a')
 
+		linkElement.props.onMouseDown(mockEvent, 'Label')
+
+		expect(mockEvent.preventDefault).toHaveBeenCalledTimes(1)
+		expect(mockEvent.stopPropagation).toHaveBeenCalledTimes(1)
 		expect(mockCommandHandler).toHaveBeenCalledWith('Label')
 	})
 })

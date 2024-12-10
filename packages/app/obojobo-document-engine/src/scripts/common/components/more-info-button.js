@@ -53,7 +53,7 @@ class MoreInfoButton extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if (this.state.mode === 'clicked') {
+		if (this.state.mode === 'clicked' && this.dialogRef.current) {
 			this.dialogRef.current.focus()
 		}
 	}

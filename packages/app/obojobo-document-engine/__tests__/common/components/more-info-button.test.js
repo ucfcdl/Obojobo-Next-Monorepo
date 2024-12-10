@@ -1,6 +1,5 @@
 import React from 'react'
 import renderer from 'react-test-renderer'
-import { mount } from 'enzyme'
 
 import MoreInfoButton from '../../../src/scripts/common/components/more-info-button'
 jest.mock('../../../src/scripts/common/util/uuid', () => {
@@ -23,41 +22,91 @@ describe('MoreInfoButton', () => {
 	})
 
 	test('Renders mouse over', () => {
-		const component = mount(<MoreInfoButton label="Testing 123" />)
-		component.instance().state.mode = 'hidden'
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const button = component.root.findByType('button')
 
-		component.find('button').simulate('mouseOver')
+		component.getInstance().setState({ mode: 'hover' })
+		button.props.onMouseOver()
 
-		expect(component.instance().state.mode).toEqual('hover')
+		const tree = component.toJSON()
+		const classNames = tree.props.className.split(' ')
 
-		component.find('button').simulate('mouseOver')
+		expect(classNames).toContain('is-mode-hover')
+	})
+	test('Renders mouse over else', () => {
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const button = component.root.findByType('button')
 
-		expect(component.instance().state.mode).toEqual('hover')
+		button.props.onMouseOver()
+
+		const tree = component.toJSON()
+		const classNames = tree.props.className.split(' ')
+
+		expect(classNames).toContain('is-mode-hover')
 	})
 
 	test('Renders mouse out', () => {
-		const component = mount(<MoreInfoButton label="Testing 123" />)
-		component.instance().state.mode = 'hover'
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const button = component.root.findByType('button')
 
-		component.find('button').simulate('mouseOut')
+		button.props.onMouseOver()
 
-		expect(component.instance().state.mode).toEqual('hidden')
+		button.props.onMouseOut()
 
-		component.find('button').simulate('mouseOut')
+		const tree = component.toJSON()
+		const classNames = tree.props.className.split(' ')
 
-		expect(component.instance().state.mode).toEqual('hidden')
+		expect(classNames).toContain('is-mode-hidden')
+	})
+	test('Renders mouse out else', () => {
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const button = component.root.findByType('button')
+
+		button.props.onMouseOut()
+
+		const tree = component.toJSON()
+		const classNames = tree.props.className.split(' ')
+
+		expect(classNames).toContain('is-mode-hidden')
 	})
 
 	test('Renders click', () => {
-		const component = mount(<MoreInfoButton label="Testing 123" />)
-		component.instance().state.mode = 'hidden'
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const button = component.root.findByType('button')
 
-		component.find('button').simulate('click')
+		const focusMock = jest.fn()
+		const moreInfoButtonInstance = component.getInstance()
+		moreInfoButtonInstance.dialogRef = { current: { focus: focusMock } }
 
-		expect(component.instance().state.mode).toEqual('clicked')
+		button.props.onClick()
 
-		component.find('button').simulate('click')
+		const tree = component.toJSON()
 
-		expect(component.instance().state.mode).toEqual('hidden')
+		const classNames = tree.props.className.split(' ')
+
+		expect(classNames).toContain('is-mode-clicked')
+
+		expect(focusMock).not.toHaveBeenCalled()
+
+		button.props.onClick()
+
+		const tree2 = component.toJSON()
+
+		const classNames2 = tree2.props.className.split(' ')
+
+		expect(classNames2).toContain('is-mode-hidden')
+	})
+	test('componentDidUpdate method', () => {
+		const component = renderer.create(<MoreInfoButton label="Testing 123" />)
+		const moreInfoButtonInstance = component.getInstance()
+		const focusMock = jest.fn()
+
+		moreInfoButtonInstance.onClick()
+
+		moreInfoButtonInstance.dialogRef = { current: { focus: focusMock } }
+
+		moreInfoButtonInstance.componentDidUpdate()
+
+		expect(focusMock).toHaveBeenCalled()
 	})
 })

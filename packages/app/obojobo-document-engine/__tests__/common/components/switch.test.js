@@ -1,7 +1,6 @@
 import React from 'react'
 import Switch from '../../../src/scripts/common/components/switch'
 import TestRenderer from 'react-test-renderer'
-import { mount } from 'enzyme'
 
 describe('Switch', () => {
 	test('Switch renders correctly with no options set', () => {
@@ -41,11 +40,15 @@ describe('Switch', () => {
 
 	test('Switch calls onChange', () => {
 		const onChecked = jest.fn()
-		const component = mount(<Switch onChange={onChecked} />)
-		const checkbox = component.find('input')
+		const component = TestRenderer.create(<Switch onChange={onChecked} />)
+		const checkbox = component.root.findByType('input')
+
 		expect(onChecked).not.toHaveBeenCalled()
-		checkbox.simulate('change', { target: { checked: true } })
+
+		checkbox.props.onChange({ target: { checked: true } })
+
 		expect(onChecked).toHaveBeenCalledTimes(1)
+
 		expect(onChecked).toHaveBeenCalledWith(expect.objectContaining({ target: { checked: true } }))
 	})
 })

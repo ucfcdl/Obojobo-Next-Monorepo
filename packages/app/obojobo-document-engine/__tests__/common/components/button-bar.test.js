@@ -1,7 +1,6 @@
 import React from 'react'
 import ButtonBar from '../../../src/scripts/common/components/button-bar'
 import renderer from 'react-test-renderer'
-import { mount } from 'enzyme'
 
 describe('ButtonBar', () => {
 	test('ButtonBar component', () => {
@@ -35,21 +34,17 @@ describe('ButtonBar', () => {
 			}
 		]
 		const mockClick = jest.fn()
-		const component = mount(<ButtonBar onClick={mockClick}>{children}</ButtonBar>)
+		const component = renderer.create(<ButtonBar onClick={mockClick}>{children}</ButtonBar>)
+		const buttonInstance = component.root.findByType('button')
 
-		component
-			.childAt(0)
-			.find('button')
-			.simulate('click')
-		expect(mockClick).toBeCalledTimes(1)
+		buttonInstance.props.onClick()
+		expect(mockClick).toHaveBeenCalledTimes(1)
 
-		// default function coverage for buttonBarOnClick
-		const componentNoClick = mount(<ButtonBar>{children}</ButtonBar>)
-		componentNoClick
-			.childAt(0)
-			.find('button')
-			.simulate('click')
-		expect(mockClick).toBeCalledTimes(1)
+		const componentNoClick = renderer.create(<ButtonBar>{children}</ButtonBar>)
+		const buttonInstanceNoClick = componentNoClick.root.findByType('button')
+
+		buttonInstanceNoClick.props.onClick()
+		expect(mockClick).toHaveBeenCalledTimes(1)
 	})
 
 	test('ButtonBar component clicks button but does not fire', () => {
@@ -59,13 +54,10 @@ describe('ButtonBar', () => {
 			}
 		]
 		const mockClick = jest.fn()
-		const component = mount(<ButtonBar onClick={mockClick}>{children}</ButtonBar>)
+		const component = renderer.create(<ButtonBar onClick={mockClick}>{children}</ButtonBar>)
+		const buttonInstance = component.root.findByType('button')
 
-		component
-			.childAt(0)
-			.find('button')
-			.simulate('click')
-
+		buttonInstance.props.onClick()
 		expect(mockClick).toHaveBeenCalled()
 	})
 })
